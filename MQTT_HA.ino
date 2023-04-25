@@ -25,10 +25,10 @@
 //  okno olek L
 
 const char* MQTTtopic = "arduino/kontaktrony/";
-const char* nazwa[] = {"o_salon_L", "o_salon_P", "o_lazienka_gora", "d_sypialnia", "o_gabinet", "o_poczekalnia", "o_kuchnia_P", "o_kuchnia_L", "o_garaz"};
+const char* name[] = {"o_salon_L", "o_salon_P", "o_lazienka_gora", "d_sypialnia", "o_gabinet", "o_poczekalnia", "o_kuchnia_P", "o_kuchnia_L", "o_garaz"};
 //char *tablica3 [] = {"o_salon_L", "o_salon_P", "o_lazienka_gora", "d_sypialnia", "o_gabinet", "o_poczekalnia", "o_kuchnia_P", "o_kuchnia_L", "o_garaz", "o_kotlownia", "o_schody", "o_garderoba", "d_goscinny", "o_goscinny_L", "o_goscinny_P", "o_olek_L", "o_olek_P"};
-byte nr_pinu[] = {29, 28, 27, 26, 25, 24, 23, 22, 21};
-byte stan_pinu[9] = {};
+byte pin_number[] = {29, 28, 27, 26, 25, 24, 23, 22, 21}; //change pin number, sequence according to name[]
+byte pin_state[9] = {};
 const int table_lenght = 9;
 
 unsigned long aktualny_czas = 0;
@@ -100,7 +100,7 @@ void setup()
 
   for (int i = 0; i < table_lenght; i++)
   {
-    pinMode(nr_pinu[i], INPUT_PULLUP);
+    pinMode(pin_number[i], INPUT_PULLUP);
   }
   
   send_status_kontaktrony();
@@ -135,15 +135,15 @@ void loop()
 
   for (int i = 0; i < table_lenght; i++)
   {
-    if (digitalRead(nr_pinu[i]) != stan_pinu[i])
+    if (digitalRead(pin_number[i]) != pin_state[i])
     {
-      stan_pinu[i] = digitalRead(nr_pinu[i]);
+      pin_state[i] = digitalRead(pin_number[i]);
 
       char topic_to_send[40];
       strcpy(topic_to_send, MQTTtopic);
-      strcat(topic_to_send, nazwa[i]);
+      strcat(topic_to_send, name[i]);
 
-      client.publish(topic_to_send, String(stan_pinu[i]).c_str(), true);
+      client.publish(topic_to_send, String(pin_state[i]).c_str(), true);
       Serial.println(topic_to_send);
     }
 
@@ -160,11 +160,11 @@ void send_status_kontaktrony()
 {
   for (int i = 0; i < table_lenght; i++)
   {
-    stan_pinu[i] = digitalRead(nr_pinu[i]);
+    pin_state[i] = digitalRead(pin_number[i]);
     char topic_to_send[40];
     strcpy(topic_to_send, MQTTtopic);
-    strcat(topic_to_send, nazwa[i]);
-    client.publish(topic_to_send, String(stan_pinu[i]).c_str(), true);   
+    strcat(topic_to_send, name[i]);
+    client.publish(topic_to_send, String(pin_state[i]).c_str(), true);   
   }
   Serial.println("Send interval status");
 }
